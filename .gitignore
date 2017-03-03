@@ -1,6 +1,7 @@
 # ignored repository #
 mseed/
 jitter/
+loggedFiles/
 
 #other files#
 nohup.out
