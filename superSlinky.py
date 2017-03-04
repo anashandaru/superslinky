@@ -286,7 +286,7 @@ def read_data():
         queue.put(packet)
 
 mseed_directory = 'mseed/'
-jitter_directory = 'jitter/'
+merged_directory = 'loggedFiles/'
 global starttime
 def save_data():
     global blockID
@@ -316,31 +316,21 @@ def save_data():
         File = mseed_directory + str(sample_stream[0].stats.starttime.date)+'_'+str(blockID)+'.mseed'
         temp_file = mseed_directory+".temp.tmp"
         
-        if os.path.isfile(File):
-            sample_stream.write(temp_file,format='MSEED',encoding='INT32',reclen=512)
-            subprocess.call("cat "+temp_file+" >> "+File,shell=True)
-            subprocess.call(["rm",temp_file])
+        sample_stream.write(File,format='MSEED',encoding='INT32',reclen=512)
+        
+        if blockID > 3215:
+            tailTime = sample_stream[0].stats.starttime
+            mergedSeed=merged_directory+str(tailTime.date)+str(tailTime.hour)+".mseed"
+            subprocess.call("cat $(ls -tr) >> " + mergedSeed ,shell=True)
+            subprocess.call("rm -f mseed/*.mseed",shell=True)
+            blockID = 0
+            #print "merged"
+            #subprocess.call(["rm",temp_file])
+
+def cleanMseed():
+    subprocess.call("rm -f mseed/*.mseed",shell=True)
             
-        else:
-            sample_stream.write(File,format='MSEED',encoding='INT32',reclen=512)
-            #print(queue.qsize()-tag)
-
-#            File = jitter_directory + str(jitter_stream[0].stats.starttime.date) + '.mseed'
-#            temp_file = jitter_directory + ".temp.tmp"
-
-#            if os.path.isfile(File):
-#                jitter_stream.write(temp_file,format='MSEED',encoding='FLOAT32',reclen=512)
-#                subprocess.call("cat "+temp_file+" >> "+File,shell=True)
-#                subprocess.call(["rm",temp_file])
-#            else:
-#                jitter_stream.write(File,format='MSEED',encoding='FLOAT32',reclen=512)
-
-#thread = Thread(target = save_data)
-#thread.start()
-
-#for x in range(5):
-#    read_data(block_length)
-
+cleanMseed()
 clean_adc()
 
 worker_sample = Thread(target=save_data)
