@@ -318,14 +318,12 @@ def save_data():
         
         sample_stream.write(File,format='MSEED',encoding='INT32',reclen=512)
         
-        if blockID > 3215:
+        if blockID > 3600:
             tailTime = sample_stream[0].stats.starttime
-            mergedSeed=merged_directory+str(tailTime.date)+str(tailTime.hour)+".mseed"
-            subprocess.call("cat $(ls -tr) >> " + mergedSeed ,shell=True)
-            subprocess.call("rm -f mseed/*.mseed",shell=True)
+            mergedSeed=merged_directory+str(tailTime.date)+"_"+str(tailTime.hour)+".mseed"
+            subprocess.call("cat $(ls -tr mseed/*.mseed) >> "+mergedSeed,shell=True)
+            subprocess.call("rm -f "+mseed_directory+"*.mseed",shell=True)
             blockID = 0
-            #print "merged"
-            #subprocess.call(["rm",temp_file])
 
 def cleanMseed():
     subprocess.call("rm -f mseed/*.mseed",shell=True)
